@@ -1,0 +1,10 @@
+{
+  "name": "ForteroudoModule-Editor",
+  "references": [
+    "ForteroudoModule"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
