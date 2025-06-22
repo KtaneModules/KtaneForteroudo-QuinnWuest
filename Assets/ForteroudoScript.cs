@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using Rnd = UnityEngine.Random;
@@ -71,6 +72,7 @@ public class ForteroudoScript : MonoBehaviour
         Debug.LogFormat("[Forteroudo #{0}] The compartments’ words, alphabetized, are {1}.", _moduleId, _compartmentWords.Join(", "));
         Debug.LogFormat("[Forteroudo #{0}] The compartments’ words, shuffled, are {1}.", _moduleId, _shuffledCompartmentWords.Join(", "));
         Debug.LogFormat("[Forteroudo #{0}] The blocks’ words, alphabetized, are {1}.", _moduleId, Alphabetize(_blockWords.Where(i => i != null).ToArray(), Data._alphabetSets[_chosenAlphabet]).Join(", "));
+        Debug.LogFormat("<Forteroudo #{0}> A valid alphabetized order of blocks, including a compartment, is {1}.", _moduleId, _orderedBlocks.Join(", "));
 
         StartCoroutine(Init());
     }
@@ -147,7 +149,9 @@ public class ForteroudoScript : MonoBehaviour
 
     private IEnumerator LongSolveLmao()
     {
-        yield return new WaitForSeconds(15f);
+        Audio.PlaySoundAtTransform("solve", transform);
+        yield return new WaitForSeconds(22f);
+        Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
         _moduleSolved = true;
         Module.HandlePass();
     }

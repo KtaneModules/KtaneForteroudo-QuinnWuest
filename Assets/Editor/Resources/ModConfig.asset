@@ -14,7 +14,9 @@ MonoBehaviour:
   id: ForteroudoModule
   title: Forteroudo
   author: Quinn Wuest
-  description: Module description
+  description: "\u26A0\uFE0F This module is not currently out of order.\n\nManual
+    by ItzShaun\nDeveloped by Quinn Wuest\n\n[url=https://ktane.timwi.de/HTML/Forteroudo.html]Manual
+    HTML[/url]\r\n[url=https://ktane.timwi.de/PDF/Forteroudo.pdf]Manual PDF[/url]"
   version: 1.0
   outputFolder: build
-  previewImage: {fileID: 2800000, guid: bd5c1f4881f57d54481b44e4c8a7779a, type: 3}
+  previewImage: {fileID: 2800000, guid: 1f6d192045f96274581847e0114f2be7, type: 3}
