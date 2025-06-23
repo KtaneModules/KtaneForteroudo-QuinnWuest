@@ -54,18 +54,18 @@ public class ForteroudoScript : MonoBehaviour
         _shuffledCompartmentWords = _compartmentWords.Select(i => i.ToArray().Shuffle().Join("")).ToArray();
 
         var alphedBlocks = Alphabetize(_blockWords, Data._alphabetSets[_chosenAlphabet]).ToList();
+
+        var list = new List<string[]>();
         for (int i = 0; i < 6; i++)
         {
             var newWords = alphedBlocks.ToList();
             newWords.Insert(i, _compartmentWords[i]);
             if (newWords.SequenceEqual(Alphabetize(newWords.ToArray(), Data._alphabetSets[_chosenAlphabet])))
-            {
-                _orderedBlocks = newWords.ToArray();
-                goto fine;
-            }
+                list.Add(newWords.ToArray());
         }
+        if (list.Count != 1)
         goto tryAgain;
-        fine:;
+        _orderedBlocks = list.First().ToArray();
 
         _blockWords.Shuffle();
         Debug.LogFormat("[Forteroudo #{0}] The chosen alphabet is {1}. ({2})", _moduleId, Data._alphabetNames[_chosenAlphabet], Data._alphabetSets[_chosenAlphabet].ToUpperInvariant());
@@ -123,6 +123,7 @@ public class ForteroudoScript : MonoBehaviour
         var alphedWords = Alphabetize(_blockWords, Data._alphabetSets[_chosenAlphabet]);
         if (!_blockWords.Where(i => i != null).SequenceEqual(alphedWords))
         {
+            Audio.PlaySoundAtTransform("strike", transform);
             Debug.LogFormat("[Forteroudo #{0}] This is not in the correct alphabetical order. Strike.", _moduleId);
             Module.HandleStrike();
             return false;
@@ -183,6 +184,7 @@ public class ForteroudoScript : MonoBehaviour
         if (command == "check")
         {
             yield return null;
+            yield return "solve";
             CheckSel.OnInteract();
             yield break;
         }
