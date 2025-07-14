@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using Rnd = UnityEngine.Random;
@@ -13,6 +12,7 @@ public class ForteroudoScript : MonoBehaviour
     public KMAudio Audio;
 
     public KMSelectable CheckSel;
+    public KMSelectable ResetSel;
     public KMSelectable[] CompartmentSels;
     public TextMesh[] CompartmentTexts;
     public GameObject[] BlockObjs;
@@ -28,6 +28,7 @@ public class ForteroudoScript : MonoBehaviour
     private string[] _shuffledCompartmentWords = new string[6];
     private string[] _blockWords = new string[6];
     private string[] _orderedBlocks = new string[6];
+    private List<string> _alphedBlocks = new List<string>();
 
     private void Start()
     {
@@ -36,6 +37,7 @@ public class ForteroudoScript : MonoBehaviour
         for (int i = 0; i < CompartmentSels.Length; i++)
             CompartmentSels[i].OnInteract += CompartmentPress(i);
         CheckSel.OnInteract += CheckPress;
+        ResetSel.OnInteract += ResetPress;
 
         tryAgain:
         _chosenAlphabet = Rnd.Range(0, Data._alphabetSets.Length);
@@ -53,18 +55,18 @@ public class ForteroudoScript : MonoBehaviour
             goto tryAgain;
         _shuffledCompartmentWords = _compartmentWords.Select(i => i.ToArray().Shuffle().Join("")).ToArray();
 
-        var alphedBlocks = Alphabetize(_blockWords, Data._alphabetSets[_chosenAlphabet]).ToList();
+        _alphedBlocks = Alphabetize(_blockWords, Data._alphabetSets[_chosenAlphabet]).ToList();
 
         var list = new List<string[]>();
         for (int i = 0; i < 6; i++)
         {
-            var newWords = alphedBlocks.ToList();
+            var newWords = _alphedBlocks.ToList();
             newWords.Insert(i, _compartmentWords[i]);
             if (newWords.SequenceEqual(Alphabetize(newWords.ToArray(), Data._alphabetSets[_chosenAlphabet])))
                 list.Add(newWords.ToArray());
         }
         if (list.Count != 1)
-        goto tryAgain;
+            goto tryAgain;
         _orderedBlocks = list.First().ToArray();
 
         _blockWords.Shuffle();
@@ -145,6 +147,43 @@ public class ForteroudoScript : MonoBehaviour
         }
 
         StartCoroutine(LongSolveLmao());
+        return false;
+    }
+
+    private bool ResetPress()
+    {
+        Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, ResetSel.transform);
+        CheckSel.AddInteractionPunch(0.5f);
+        if (!_canInteract)
+            return false;
+
+        tryAgain:
+        var compWordsToPickFrom = Data._allWords.Where(i => !_blockWords.Contains(i)).ToArray();
+        var pickedWords = compWordsToPickFrom.Shuffle().Take(6).ToArray();
+        pickedWords = Alphabetize(pickedWords, Data._alphabetSets[_chosenAlphabet]);
+
+        var list = new List<string[]>();
+        for (int i = 0; i < 6; i++)
+        {
+            var newWords = _alphedBlocks.ToList();
+            newWords.Insert(i, pickedWords[i]);
+            if (newWords.SequenceEqual(Alphabetize(newWords.ToArray(), Data._alphabetSets[_chosenAlphabet])))
+                list.Add(newWords.ToArray());
+        }
+        if (list.Count != 1)
+            goto tryAgain;
+        _orderedBlocks = list.First().ToArray();
+
+        for (int i = 0; i < 6; i++)
+            _compartmentWords[i] = pickedWords[i];
+        _shuffledCompartmentWords = _compartmentWords.Select(i => i.ToArray().Shuffle().Join("")).ToArray();
+        for (int i = 0; i < 6; i++)
+            CompartmentTexts[i].text = _shuffledCompartmentWords[i];
+
+        Debug.LogFormat("[Forteroudo #{0}] Reset pressed.", _moduleId);
+        Debug.LogFormat("[Forteroudo #{0}] The compartments’ new words, alphabetized, are {1}.", _moduleId, _compartmentWords.Join(", "));
+        Debug.LogFormat("[Forteroudo #{0}] The compartments’ new words, shuffled, are {1}.", _moduleId, _shuffledCompartmentWords.Join(", "));
+        Debug.LogFormat("<Forteroudo #{0}> A valid alphabetized order of blocks, including a compartment, is {1}.", _moduleId, _orderedBlocks.Join(", "));
         return false;
     }
 
